@@ -90,7 +90,8 @@
     //******************************
     session = [AVCaptureSession new];
 
-    device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    // Use front camera for capture
+    device = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionFront];
     
     NSError *error = nil;
     input = [AVCaptureDeviceInput deviceInputWithDevice:device error:&error];
@@ -124,7 +125,8 @@
     device.activeVideoMinFrameDuration = CMTimeMake(1, FPS);
     device.activeVideoMaxFrameDuration = CMTimeMake(1, FPS);
 
-    [device setFocusModeLockedWithLensPosition:lensPosition completionHandler:nil];
+    if ([device isFocusModeSupported:AVCaptureFocusModeLocked])
+        [device setFocusModeLockedWithLensPosition:lensPosition completionHandler:nil];
     [device unlockForConfiguration];
     
     NSString *mediaType = AVMediaTypeVideo;
@@ -148,15 +150,20 @@
     for (int i = 0; i < [_outputs count]; ++i) {
             NSArray<AVCaptureConnection *> *_connections = _outputs[i].connections;
             for (int j = 0; j < [_connections count]; ++j) {
+                _connections[j].videoOrientation = AVCaptureVideoOrientationLandscapeRight;
+                _connections[j].videoMirrored = true;
                 if(_connections[j].isCameraIntrinsicMatrixDeliverySupported)
                     _connections[j].cameraIntrinsicMatrixDeliveryEnabled = true;
         }
     }
     
     //******************************
-    if(ARWorldTrackingConfiguration.isSupported){
-        arConfiguration = [[ARWorldTrackingConfiguration alloc] init];
-        arConfiguration.worldAlignment = ARWorldAlignmentGravity;//ARWorldAlignmentGravityAndHeading;
+    //if(ARWorldTrackingConfiguration.isSupported){
+    //    arConfiguration = [[ARWorldTrackingConfiguration alloc] init];
+    //    arConfiguration.worldAlignment = ARWorldAlignmentGravity;//ARWorldAlignmentGravityAndHeading;
+    if(ARFaceTrackingConfiguration.isSupported){
+        arConfiguration = [[ARFaceTrackingConfiguration alloc] init];
+        NSLog(@"video formats: %@",[ARFaceTrackingConfiguration supportedVideoFormats]);
     }
     else{
         [segmentedControl removeSegmentAtIndex:3 animated:NO];
@@ -612,7 +619,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             arSession = [ARSession new];
             arSession.delegate = self;
             if (@available(iOS 11.3, *)) {
-                arConfiguration.autoFocusEnabled = true;
+                if ([arConfiguration isKindOfClass:[ARWorldTrackingConfiguration class]])
+                    ((ARWorldTrackingConfiguration *)arConfiguration).autoFocusEnabled = true;
             } else {
                 // Fallback on earlier versions
             }
@@ -624,7 +632,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             afLabel.hidden = YES;
             
             [device lockForConfiguration:nil];
-            device.focusMode = AVCaptureFocusModeContinuousAutoFocus;
+            if ([device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus])
+                device.focusMode = AVCaptureFocusModeContinuousAutoFocus;
             [device unlockForConfiguration];
         }
         
@@ -637,7 +646,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             arSession = [ARSession new];
             arSession.delegate = self;
             if (@available(iOS 11.3, *)) {
-                arConfiguration.autoFocusEnabled = false;
+                if ([arConfiguration isKindOfClass:[ARWorldTrackingConfiguration class]])
+                    ((ARWorldTrackingConfiguration *)arConfiguration).autoFocusEnabled = false;
             } else {
                 // Fallback on earlier versions
             }
@@ -649,7 +659,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             afLabel.hidden = NO;
             
             [device lockForConfiguration:nil];
-            [device setFocusModeLockedWithLensPosition:lensPosition completionHandler:nil];
+            if ([device isFocusModeSupported:AVCaptureFocusModeLocked])
+                [device setFocusModeLockedWithLensPosition:lensPosition completionHandler:nil];
             [device unlockForConfiguration];
         }
         
@@ -665,7 +676,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 - (IBAction)afSliderEndEditing:(id)sender {
     lensPosition = afSlider.value;
     [device lockForConfiguration:nil];
-    [device setFocusModeLockedWithLensPosition:lensPosition completionHandler:nil];
+    if ([device isFocusModeSupported:AVCaptureFocusModeLocked])
+        [device setFocusModeLockedWithLensPosition:lensPosition completionHandler:nil];
     [device unlockForConfiguration];
 }
 

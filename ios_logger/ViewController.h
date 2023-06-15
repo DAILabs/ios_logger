@@ -32,7 +32,8 @@
     dispatch_queue_t sbfQueue;
     
     ARSession *arSession;
-    ARWorldTrackingConfiguration *arConfiguration;
+    //ARWorldTrackingConfiguration *arConfiguration;
+    ARConfiguration *arConfiguration;
     
     CALayer *viewLayer;
     AVCaptureVideoPreviewLayer *captureVideoPreviewLayer;
