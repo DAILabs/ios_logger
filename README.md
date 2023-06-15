@@ -1,3 +1,6 @@
+# Fork information:
+This is a fork of `ios_logger`. The primary modification is switching to use the front camera instead of rear camera. Ideally this would be put in a toggle, but we will not likely make this change at this time.
+
 # ios_logger
 Application for logging camera images, accelerometer and gyroscope data,  gps and heading data, motion data and magnet data. 
 
