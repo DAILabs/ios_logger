@@ -166,6 +166,10 @@
     if(ARFaceTrackingConfiguration.isSupported){
         arConfiguration = [[ARFaceTrackingConfiguration alloc] init];
         NSLog(@"video formats: %@",[ARFaceTrackingConfiguration supportedVideoFormats]);
+        
+        if (ARFaceTrackingConfiguration.supportsWorldTracking) {
+            ((ARFaceTrackingConfiguration *)arConfiguration).worldTrackingEnabled = true;
+        }
     }
     else{
         [segmentedControl removeSegmentAtIndex:3 animated:NO];
