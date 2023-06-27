@@ -29,6 +29,8 @@
     lensPosition = afSlider.value;
     afLabel.text = [NSString stringWithFormat:@"%5.3f",afSlider.value];
     
+    camLabel.text = @"";
+
     dateFormat = [[NSDateFormatter alloc] init];
     [dateFormat setDateFormat:@"yyyy-MM-dd'T'HH-mm-ss"]; //"dd-MM-yyyy-HH-mm-SS"
     
@@ -377,7 +379,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     {
         matrix_float3x3 *camMatrix = nullptr;
         
-        if(isRecording || isStarted)
+        //if(isRecording || isStarted)
         {
             if(connection.isCameraIntrinsicMatrixDeliveryEnabled)
             {
@@ -491,8 +493,13 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
     CIImage *ciimage = [CIImage imageWithCVImageBuffer:pixelBuffer];
     UIImage *img = [UIImage imageWithCIImage:ciimage];
+    NSString *camLabelText = @"";
+    if(camMat != nullptr){
+        camLabelText = [NSString stringWithFormat:@"ctr: %5.1f %5.1f, f: %5.1f", camMat->columns[2][0], camMat->columns[2][1], camMat->columns[0][0]];
+    }
     dispatch_async(dispatch_get_main_queue(), ^{
         self->imageView.image = img;
+        self->camLabel.text = camLabelText;
     });
 }
 

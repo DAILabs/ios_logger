@@ -24,7 +24,8 @@
     __weak IBOutlet UISwitch *gpsheadSwitch;
     __weak IBOutlet UISwitch *motionSwitch;
     __weak IBOutlet UISwitch *magnetSwitch;
-    
+    __weak IBOutlet UILabel *camLabel;
+
     AVCaptureSession *session;
     AVCaptureDevice *device;
     AVCaptureDeviceInput *input;
